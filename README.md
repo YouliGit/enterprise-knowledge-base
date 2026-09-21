@@ -310,8 +310,8 @@
 ### 第一步：克隆代码
 
 ```bash
-git clone https://github.com/<你的用户名>/<仓库名>.git
-cd <仓库名>
+git clone https://github.com/YouliGit/enterprise-knowledge-base.git
+cd enterprise-knowledge-base
 ```
 
 ### 第二步：启动全部服务
