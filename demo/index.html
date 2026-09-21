@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agentic RAG 企业级知识库平台 - 在线体验</title>
+<style>
+:root{
+  --primary:#409eff; --primary-d:#337ecc; --bg:#f5f7fa; --card:#fff;
+  --text:#303133; --text2:#606266; --text3:#909399; --line:#e4e7ed;
+  --ok:#67c23a; --warn:#e6a23c; --danger:#f56c6c; --purple:#9b59e0;
+  --radius:10px; --shadow:0 2px 12px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+a{color:var(--primary);text-decoration:none}
+a:hover{color:var(--primary-d)}
+code{background:#eef1f6;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:.9em}
+
+/* ---------- hero ---------- */
+.hero{background:linear-gradient(135deg,#1f2d3d 0%,#2b3f55 55%,#1f3a5f 100%);color:#fff;padding:64px 0 56px}
+.hero .wrap{display:flex;gap:40px;align-items:center;flex-wrap:wrap}
+.hero-l{flex:1 1 460px}
+.hero h1{font-size:34px;line-height:1.3;margin-bottom:12px}
+.hero h1 .en{display:block;font-size:15px;font-weight:400;color:#9fb6cc;margin-top:6px;letter-spacing:.5px}
+.hero p.desc{color:#c6d3e0;font-size:15px;max-width:560px;margin-bottom:20px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:3px 12px;font-size:12.5px;color:#dce7f2}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:10px 22px;font-size:14.5px;cursor:pointer;border:none;transition:.2s;font-weight:500}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45)}
+.btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-d);color:#fff}
+.hero-r{flex:0 0 320px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:22px 24px}
+.hero-r h3{font-size:14px;color:#9fb6cc;margin-bottom:14px;font-weight:500}
+.stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.14);font-size:13.5px}
+.stat:last-child{border-bottom:none}
+.stat b{color:#fff;font-weight:600}
+.stat span{color:#b7c7d8}
+
+/* ---------- sections ---------- */
+section{padding:56px 0}
+.sec-head{text-align:center;margin-bottom:36px}
+.sec-head h2{font-size:26px;margin-bottom:8px}
+.sec-head p{color:var(--text3);font-size:14.5px;max-width:640px;margin:0 auto}
+.tag-demo{display:inline-flex;align-items:center;gap:6px;background:#fdf6ec;border:1px solid #f5dab1;color:#b88230;border-radius:20px;padding:3px 14px;font-size:12.5px;margin-bottom:14px}
+
+/* ---------- chat ---------- */
+.chat-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;height:640px}
+.chat-side{display:none}
+@media(min-width:860px){.chat-card{flex-direction:row}.chat-side{display:flex;flex-direction:column;width:250px;border-right:1px solid var(--line);background:#fafbfc;padding:16px;gap:8px}}
+.chat-side h4{font-size:13px;color:var(--text3);font-weight:500;margin-bottom:4px}
+.q-chip{border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-size:13.5px;text-align:left;cursor:pointer;transition:.15s;color:var(--text2);line-height:1.45}
+.q-chip:hover{border-color:var(--primary);color:var(--primary)}
+.q-chip.active{background:#ecf5ff;border-color:var(--primary);color:var(--primary)}
+.q-chip .sub{display:block;font-size:11.5px;color:var(--text3);margin-top:2px}
+.side-note{margin-top:auto;font-size:12px;color:var(--text3);background:#f4f4f5;border-radius:8px;padding:10px;line-height:1.6}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-msgs{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:10px;max-width:92%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.avatar{flex:0 0 34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+.avatar.ai{background:linear-gradient(135deg,#409eff,#7b5cf0)}
+.avatar.hu{background:#c0c4cc}
+.bubble{background:#f4f4f5;border-radius:10px;padding:10px 14px;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.msg.user .bubble{background:var(--primary);color:#fff}
+.bubble .cursor{display:inline-block;width:7px;height:15px;background:var(--primary);vertical-align:-2px;animation:blink .8s infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;align-items:center;gap:8px;font-size:12.8px;color:var(--text2);background:#f8f9fb;border:1px solid var(--line);border-radius:8px;padding:6px 10px;animation:fadein .3s}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.step .ic{width:18px;height:18px;border-radius:50%;background:var(--primary);color:#fff;font-size:10.5px;display:flex;align-items:center;justify-content:center;flex:none}
+.step.done .ic{background:var(--ok)}
+.step b{font-weight:600;color:var(--text)}
+.step .ms{margin-left:auto;color:var(--text3);font-size:11.5px;flex:none}
+.refs-box{border:1px solid var(--line);border-radius:8px;overflow:hidden;animation:fadein .3s}
+.refs-head{background:#f8f9fb;padding:8px 12px;font-size:12.8px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.refs-head .arr{transition:.2s;color:var(--text3)}
+.refs-box.open .refs-head .arr{transform:rotate(90deg)}
+.refs-body{display:none;border-top:1px solid var(--line)}
+.refs-box.open .refs-body{display:block}
+.ref-item{padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:12.8px}
+.ref-item:last-child{border-bottom:none}
+.ref-item .rt{display:flex;gap:8px;align-items:center;margin-bottom:4px;flex-wrap:wrap}
+.ref-item .no{background:#ecf5ff;color:var(--primary);border-radius:4px;padding:0 6px;font-size:11.5px;font-weight:600}
+.score-tag{background:#f4f4f5;color:var(--text3);border-radius:4px;padding:0 6px;font-size:11px}
+.ref-item .rc{color:var(--text2);line-height:1.6;max-height:88px;overflow:hidden;position:relative}
+.cost-line{font-size:12px;color:var(--text3);text-align:right;padding:0 4px}
+.chat-input{border-top:1px solid var(--line);padding:14px 18px;display:flex;gap:10px;background:#fff}
+.chat-input input{flex:1;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;transition:.2s;color:var(--text)}
+.chat-input input:focus{border-color:var(--primary)}
+.chat-input .btn{padding:10px 26px}
+.chat-input .btn:disabled{opacity:.5;cursor:not-allowed}
+.hint-notice{background:#fdf6ec;border:1px solid #f5dab1;color:#a1771f;border-radius:8px;padding:10px 14px;font-size:13px;margin:0 22px 14px;display:none;animation:fadein .3s}
+.hint-notice.show{display:block}
+
+/* ---------- pipeline ---------- */
+.pipe-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 28px}
+.pipe-q{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;align-items:center}
+.pipe-q .lbl{font-size:13.5px;color:var(--text3);margin-right:4px}
+.play-row{display:flex;gap:10px;margin-bottom:26px;align-items:center;flex-wrap:wrap}
+.stages{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:8px}
+@media(max-width:860px){.stages{grid-template-columns:repeat(3,1fr)}}
+.stage{border:1.5px solid var(--line);border-radius:10px;padding:12px 10px;text-align:center;position:relative;transition:.25s;background:#fafbfc;opacity:.45}
+.stage .sname{font-size:13.5px;font-weight:600;margin-bottom:4px}
+.stage .sscale{font-size:11px;border-radius:10px;padding:0 8px;display:inline-block;margin-bottom:6px}
+.stage .sinfo{font-size:11.5px;color:var(--text3);line-height:1.5}
+.stage .sms{font-size:11px;color:var(--text3);margin-top:4px}
+.stage.lit{opacity:1;border-color:var(--primary);background:#ecf5ff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(64,158,255,.18)}
+.stage.lit .sname{color:var(--primary-d)}
+.sc-cosine{background:#e1f0ff;color:#337ecc}
+.sc-bm25{background:#faecd8;color:#b88230}
+.sc-rrf{background:#f3e8fd;color:#7c3aed}
+.sc-rerank{background:#e1f3d8;color:#529b2e}
+.sc-none{background:#f4f4f5;color:#909399}
+.pipe-detail{border:1px solid var(--line);border-radius:10px;margin-top:18px;overflow:hidden;animation:fadein .3s}
+.pd-head{background:#f8f9fb;padding:10px 16px;font-size:13.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pd-note{font-size:12.8px;color:var(--text2);padding:12px 16px;border-bottom:1px solid #f0f2f5}
+.pd-hits{padding:8px 16px 12px}
+.hit-row{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px dashed #f0f2f5;font-size:12.8px}
+.hit-row:last-child{border-bottom:none}
+.hit-row .rk{color:var(--text3);flex:none;font-size:11.5px;width:34px}
+.hit-row .hs{font-weight:600;flex:none;min-width:64px}
+.hit-row .hp{color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.final-ctx{margin-top:18px}
+.final-ctx h4{font-size:14.5px;margin-bottom:12px}
+.empty-ctx{background:#fdf6ec;border:1px solid #f5dab1;border-radius:10px;padding:16px 18px;font-size:13.2px;color:#8a6520;line-height:1.75;animation:fadein .3s}
+.empty-ctx b{color:#b88230}
+.empty-ctx code{background:#fff8ec;border-color:#f0d9a8;color:#8a6520}
+.ctx-card{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:13.2px}
+.ctx-card .ct{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.ctx-card .cc{color:var(--text2);max-height:120px;overflow:hidden;line-height:1.7}
+
+/* ---------- screenshots ---------- */
+.shot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.shot{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:zoom-in;transition:.2s;border:1px solid var(--line)}
+.shot:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.shot img{width:100%;display:block;aspect-ratio:16/10;object-fit:cover;object-position:top}
+.shot .cap{padding:9px 14px;font-size:13px;color:var(--text2);border-top:1px solid #f0f2f5}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:99;cursor:zoom-out;padding:30px}
+#lightbox.show{display:flex}
+#lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:0 10px 60px rgba(0,0,0,.5)}
+
+/* ---------- arch ---------- */
+.arch-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px;margin-bottom:24px;overflow-x:auto}
+.arch{display:flex;flex-direction:column;gap:14px;min-width:680px}
+.arch-row{display:flex;gap:12px;justify-content:center}
+.node{border:1.5px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;text-align:center;background:#fafbfc;min-width:120px}
+.node b{display:block;font-size:13.5px}
+.node span{font-size:11.5px;color:var(--text3)}
+.node.hot{border-color:var(--primary);background:#ecf5ff}
+.node.hot b{color:var(--primary-d)}
+.arrow{text-align:center;color:#c0c4cc;font-size:16px;line-height:1}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:860px){.two-col{grid-template-columns:1fr}}
+.mini-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 26px}
+.mini-card h3{font-size:16.5px;margin-bottom:14px}
+.feature{display:flex;gap:10px;margin-bottom:11px;font-size:13.8px;color:var(--text2)}
+.feature .fi{color:var(--ok);font-weight:700;flex:none}
+.feature b{color:var(--text)}
+.pre{background:#1f2d3d;color:#d8e4f0;border-radius:10px;padding:16px 18px;font-family:Consolas,Menlo,monospace;font-size:13px;overflow-x:auto;line-height:1.8}
+.pre .cm{color:#7f95a8}
+.pre .str{color:#a3d3a0}
+
+/* ---------- footer ---------- */
+footer{background:#1f2d3d;color:#9fb6cc;padding:34px 0;font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+footer a{color:#c6d3e0}
+.toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:#303133;color:#fff;border-radius:8px;padding:9px 22px;font-size:13.5px;opacity:0;transition:.3s;pointer-events:none;z-index:100}
+.toast.show{opacity:.92}
+.replay-note{font-size:12.3px;color:var(--text3);text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-l">
+      <h1>AI Agentic RAG 企业级知识库平台
+        <span class="en">Enterprise Knowledge Base · Hybrid Retrieval · LangGraph Agent · Full-stack</span>
+      </h1>
+      <p class="desc">让企业知识真正被检索到：查询改写 → 向量 ∥ BM25 双路召回 → RRF 名次融合 → 父子分块回填 → 精细化重排，全程量纲显式化、阶段可回放；Agentic 循环自主决定"要不要再检索一次"。</p>
+      <div class="badges">
+        <span class="badge">FastAPI</span><span class="badge">LangChain</span><span class="badge">LangGraph</span>
+        <span class="badge">PGVector</span><span class="badge">MySQL 8</span><span class="badge">Vue 3</span>
+        <span class="badge">Element Plus</span><span class="badge">Docker Compose ×5</span><span class="badge">SSE 流式</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#experience">▶ 在线体验</a>
+        <a class="btn btn-ghost" href="https://github.com/YouliGit/enterprise-knowledge-base" target="_blank" rel="noopener">GitHub 仓库</a>
+        <a class="btn btn-ghost" href="#deploy">本地部署</a>
+      </div>
+    </div>
+    <div class="hero-r">
+      <h3>项目关键数据</h3>
+      <div class="stat"><span>测试用例</span><b>139 条全通过</b></div>
+      <div class="stat"><span>修复缺陷</span><b>13 个（含 3 个 P0）</b></div>
+      <div class="stat"><span>后端 / 前端代码</span><b>4841 / 4595 行</b></div>
+      <div class="stat"><span>数据表</span><b>25 张 + 向量表</b></div>
+      <div class="stat"><span>容器编排</span><b>5 个（含 Mock 沙箱）</b></div>
+      <div class="stat"><span>检索阶段追踪</span><b>6 阶段全量可回放</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 体验区 ================= -->
+<section id="experience">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag-demo">interactive demo</div>
+      <h2>在线体验</h2>
+      <p>下方问答与检索过程均为<b>真实系统运行的录制回放</b>（Docker 沙箱大模型驱动），每个数字、每个阶段耗时都来自真实调用。</p>
+    </div>
+
+    <!-- 问答模拟 -->
+    <div class="chat-card" style="margin-bottom:34px">
+      <div class="chat-side">
+        <h4>试一试（真实问题）</h4>
+        <button class="q-chip" data-q="agent">出差住宿费能报销多少？<span class="sub">Agentic RAG · 多步推理回放</span></button>
+        <button class="q-chip" data-q="normal">GTE-3000 的工作温度是多少？<span class="sub">单轮混合检索 · 6 阶段追踪</span></button>
+        <div class="side-note">💡 点击问题自动回放真实执行过程：Agent 步骤、逐字流式输出、引用来源与真实耗时。</div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-msgs" id="msgs">
+          <div class="msg"><div class="avatar ai">AI</div><div class="bubble">你好！我是企业知识库助手。点击左侧问题，体验真实的检索问答过程。</div></div>
+        </div>
+        <div class="hint-notice" id="hint"></div>
+        <div class="chat-input">
+          <input id="inp" placeholder="输入你的问题（在线演示仅内置示例问题的完整回放）…" />
+          <button class="btn btn-primary" id="send">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 检索管线 -->
+    <div class="pipe-card">
+      <div class="pipe-q">
+        <span class="lbl">选择检索问题：</span>
+        <button class="q-chip" data-p="chailu">出差住宿费能报销多少</button>
+        <button class="q-chip" data-p="nianjia">年假可以休几天，怎么申请</button>
+        <button class="q-chip" data-p="gte">GTE-3000 支持哪些速率<span class="sub">边界案例 · 重排后全被过滤</span></button>
+      </div>
+      <div class="play-row">
+        <button class="btn btn-primary" id="pipe-play">▶ 播放检索过程</button>
+        <span style="font-size:12.5px;color:var(--text3)" id="pipe-strategy"></span>
+      </div>
+      <div class="stages" id="stages"></div>
+      <div id="pipe-detail"></div>
+      <div class="final-ctx" id="final-ctx"></div>
+      <div class="replay-note">量纲说明：余弦相似度 / 重排相关分取值 0~1，适用阈值过滤；BM25 分数无上界、RRF 为名次分 —— 二者不适用阈值，只能做名次融合，这正是引入 RRF 的原因。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 截图 ================= -->
+<section style="background:#fff">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>系统界面</h2>
+      <p>以下截图采集自本地真实运行的系统（Docker 一键部署，登录 admin 后逐页截取）。</p>
+    </div>
+    <div class="shot-grid" id="shots"></div>
+  </div>
+</section>
+
+<!-- ================= 架构与亮点 ================= -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>系统架构与技术亮点</h2>
+      <p>前后端分离 · 5 容器 Docker 编排 · 零成本可复现（内置 OpenAI 兼容 Mock 大模型沙箱）</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch">
+        <div class="arch-row">
+          <div class="node"><b>用户</b><span>浏览器</span></div>
+          <div class="arrow">→</div>
+          <div class="node"><b>Vue 3 管理端 / 问答门户</b><span>nginx :8080 · Element Plus</span></div>
+          <div class="arrow">→</div>
+          <div class="node hot"><b>FastAPI 后端</b><span>:9090 · SSE 流式 · JWT</span></div>
+        </div>
+        <div class="arch-row"><div class="arrow">↓</div><div class="arrow">↓</div><div class="arrow">↓</div></div>
+        <div class="arch-row">
+          <div class="node hot"><b>混合检索管线</b><span>改写→向量∥BM25→RRF→回填→重排</span></div>
+          <div class="node hot"><b>LangGraph Agent</b><span>检索→评估→改写→生成→自查</span></div>
+          <div class="node hot"><b>LLM-as-judge 评测</b><span>Recall/Precision/Faithful/Relevancy</span></div>
+        </div>
+        <div class="arch-row"><div class="arrow">↓</div><div class="arrow">↓</div></div>
+        <div class="arch-row">
+          <div class="node"><b>MySQL 8</b><span>25 张业务表 :3307</span></div>
+          <div class="node"><b>PostgreSQL + PGVector</b><span>向量检索 :5432</span></div>
+          <div class="node"><b>大模型接入</b><span>百炼 API / Mock 沙箱 :8898</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <h3>🎯 核心设计亮点</h3>
+        <div class="feature"><span class="fi">✓</span><div><b>量纲显式化检索管线</b>：四个阶段各自标注取值范围与阈值适用性，StageTrace 全量落库，前端逐阶段回放 —— 混合检索不再是黑盒。</div></div>
+        <div class="feature"><span class="fi">✓</span><div><b>父子分块策略</b>：小块用来找（子块向量化，命中准），大块用来答（命中后回填完整父块，上下文全）。</div></div>
+        <div class="feature"><span class="fi">✓</span><div><b>Agentic RAG 状态图</b>：LangGraph 编排检索→评估→改写→再检索→生成→自查，检索几轮由模型判断，代码只设上限。</div></div>
+        <div class="feature"><span class="fi">✓</span><div><b>策略对比看板</b>：最多 4 套检索策略并排评测，四指标量化对比，为论文实验提供数据平台。</div></div>
+      </div>
+      <div class="mini-card">
+        <h3>🧪 质量保障</h3>
+        <div class="feature"><span class="fi">✓</span><div><b>三层测试体系</b>：AST 静态检查（42 文件 0 异常）+ 接口层 107 用例 + 端到端 32 用例，全部通过。</div></div>
+        <div class="feature"><span class="fi">✓</span><div><b>13 个缺陷完整档案</b>：含 3 个 P0（文档入库 100% 失败 / 检索链路崩溃 / SSE 永久挂起），每个都有根因分析与修复验证。</div></div>
+        <div class="feature"><span class="fi">✓</span><div><b>Mock 大模型沙箱</b>：纯标准库实现 OpenAI/DashScope 兼容服务，支持流式、tool_calls 与故障注入，全链路零成本可复现。</div></div>
+        <div class="feature"><span class="fi">✓</span><div><b>一键部署</b>：docker compose up -d --build 即起 4 容器；--profile test 追加 Mock 沙箱演示全链路。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 部署 ================= -->
+<section id="deploy" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>本地部署</h2>
+      <p>只需 Docker 与 Git，无需安装任何语言环境；首次构建约 5~15 分钟（已配置国内加速源）。</p>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <h3>① 拉取并启动</h3>
+        <div class="pre"><span class="cm"># 克隆</span><br><span class="str">git clone https://github.com/YouliGit/enterprise-knowledge-base.git</span><br><span class="str">cd enterprise-knowledge-base</span><br><br><span class="cm"># 一键构建启动（4 容器）</span><br><span class="str">docker compose up -d --build</span><br><br><span class="cm"># 可选：追加 Mock 大模型沙箱（零成本体验全链路）</span><br><span class="str">docker compose --profile test up -d</span></div>
+      </div>
+      <div class="mini-card">
+        <h3>② 访问系统</h3>
+        <div class="pre"><span class="cm"># 前端（管理端 + 智能问答门户）</span><br>http://localhost:8080<br><br><span class="cm"># 后端 API 文档（Swagger）</span><br>http://localhost:9090/docs<br><br><span class="cm"># 默认账号</span><br>admin / admin<br><br><span class="cm"># Mock 沙箱（启动 test profile 后）</span><br>模型地址填 http://mock-llm:8000，对话/向量带 /v1 前缀</div>
+        <p style="font-size:12.5px;color:var(--text3);margin-top:12px">完整配置说明、检索管线原理与常见问题排查，见仓库 README。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>AI Agentic RAG 企业级知识库平台 · MIT License</div>
+    <div>本页为静态演示（真实运行数据回放）· <a href="https://github.com/YouliGit/enterprise-knowledge-base" target="_blank" rel="noopener">GitHub ↗</a></div>
+  </div>
+</footer>
+
+<div id="lightbox"><img id="lb-img" src="" alt="preview"></div>
+<div class="toast" id="toast"></div>
+
+<script id="demo-data" type="application/json">{"dialog_agent":{"steps":[{"seq":1,"node":"retrieve","node_cn":"检索","action":"第1轮混合检索","thought":"命中2个父块","cost_ms":72,"status":"ok"},{"seq":2,"node":"evaluate","node_cn":"评估","action":"评估召回质量","thought":"检索到可用片段，资料充分","cost_ms":19,"status":"ok"},{"seq":3,"node":"generate","node_cn":"生成","action":"生成答案","thought":"基于2个片段作答","cost_ms":75,"status":"ok"},{"seq":4,"node":"self_check","node_cn":"自查","action":"答案质检","thought":"答案均可由参考资料支撑","cost_ms":16,"status":"ok"}],"tokens":["针对「","出差住","宿费能","报销多","少」：","# 费","用报销","管理办","法。（","依据资","料[1","]，详","见资料","[2]","）"],"refs":[{"rank":1,"chunk_id":394,"scores":{"cosine":0.23365705635370637,"bm25":null,"rerank":0.233657},"content":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用一律不予报销。\n\n## 2. 报销流程\n报销流程分为四个环节：填写报销单、直属主管审批、财务审核、银行打款。材料齐全的情况下，整个流程一般需要五个工作日完成。单笔金额超过 5000 元的费用，需分管领导额外签批。\n\n## 3. 差旅标准\n交通费按照职级对应标准执行，原则上选择经济舱与经济座。住宿费按城市等级分档：一线城市每晚上限 600 元，二线城市每晚上限 450 元，其他城市每晚上限 350 元。伙食补助每人每天 100 元。\n\n#"},{"rank":2,"chunk_id":389,"scores":{"cosine":null,"bm25":null,"rerank":0.078817},"content":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与 25Gbps 两种速率档位，采用可热插拔的 SFP+ 封装，广泛应用于服务器网卡、交换机上行端口与存储网络。\n\n## 2. 工作温度范围\n光模块的工作温度范围是选型时最重要的环境指标。GTE-3000 系列提供两种温度等级：\n工业级光模块的工作温度范围为 -40℃ 到 85℃，存储温度范围为 -40℃ 到 85℃；\n商业级光模块的工作温度范围为 0℃ 到 70℃，存储温度范围为 -40℃ 到 85℃。\n当环境温度超出工作温度范围时，"}],"cost_ms":251,"app":"演示应用-Agentic RAG","use_agent":true,"answer":"针对「出差住宿费能报销多少」：# 费用报销管理办法。（依据资料[1]，详见资料[2]）","timeline":[{"k":"step","v":{"seq":1,"node":"retrieve","node_cn":"检索","action":"第1轮混合检索","thought":"命中2个父块","cost_ms":72,"status":"ok"}},{"k":"step","v":{"seq":2,"node":"evaluate","node_cn":"评估","action":"评估召回质量","thought":"检索到可用片段，资料充分","cost_ms":19,"status":"ok"}},{"k":"token","v":"针对「"},{"k":"token","v":"出差住"},{"k":"token","v":"宿费能"},{"k":"token","v":"报销多"},{"k":"token","v":"少」："},{"k":"token","v":"# 费"},{"k":"token","v":"用报销"},{"k":"token","v":"管理办"},{"k":"token","v":"法。（"},{"k":"token","v":"依据资"},{"k":"token","v":"料[1"},{"k":"token","v":"]，详"},{"k":"token","v":"见资料"},{"k":"token","v":"[2]"},{"k":"token","v":"）"},{"k":"step","v":{"seq":3,"node":"generate","node_cn":"生成","action":"生成答案","thought":"基于2个片段作答","cost_ms":75,"status":"ok"}},{"k":"step","v":{"seq":4,"node":"self_check","node_cn":"自查","action":"答案质检","thought":"答案均可由参考资料支撑","cost_ms":16,"status":"ok"}},{"k":"refs","v":[{"rank":1,"chunk_id":394,"scores":{"cosine":0.23365705635370637,"bm25":null,"rerank":0.233657},"content":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用一律不予报销。\n\n## 2. 报销流程\n报销流程分为四个环节：填写报销单、直属主管审批、财务审核、银行打款。材料齐全的情况下，整个流程一般需要五个工作日完成。单笔金额超过 5000 元的费用，需分管领导额外签批。\n\n## 3. 差旅标准\n交通费按照职级对应标准执行，原则上选择经济舱与经济座。住宿费按城市等级分档：一线城市每晚上限 600 元，二线城市每晚上限 450 元，其他城市每晚上限 350 元。伙食补助每人每天 100 元。\n\n#"},{"rank":2,"chunk_id":389,"scores":{"cosine":null,"bm25":null,"rerank":0.078817},"content":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与 25Gbps 两种速率档位，采用可热插拔的 SFP+ 封装，广泛应用于服务器网卡、交换机上行端口与存储网络。\n\n## 2. 工作温度范围\n光模块的工作温度范围是选型时最重要的环境指标。GTE-3000 系列提供两种温度等级：\n工业级光模块的工作温度范围为 -40℃ 到 85℃，存储温度范围为 -40℃ 到 85℃；\n商业级光模块的工作温度范围为 0℃ 到 70℃，存储温度范围为 -40℃ 到 85℃。\n当环境温度超出工作温度范围时，"}]}]},"dialog_normal":{"steps":[],"tokens":["针对「","GTE","-30","00的","工作温","度是多","少」：","# 光","模块产","品手册","。（依","据资料","[1]","）"],"refs":[{"rank":1,"chunk_id":389,"scores":{"cosine":0.2898897252050583,"bm25":null,"rerank":0.151222},"content":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与 25Gbps 两种速率档位，采用可热插拔的 SFP+ 封装，广泛应用于服务器网卡、交换机上行端口与存储网络。\n\n## 2. 工作温度范围\n光模块的工作温度范围是选型时最重要的环境指标。GTE-3000 系列提供两种温度等级：\n工业级光模块的工作温度范围为 -40℃ 到 85℃，存储温度范围为 -40℃ 到 85℃；\n商业级光模块的工作温度范围为 0℃ 到 70℃，存储温度范围为 -40℃ 到 85℃。\n当环境温度超出工作温度范围时，"}],"cost_ms":154,"app":"演示应用-普通问答","use_agent":false,"answer":"针对「GTE-3000的工作温度是多少」：# 光模块产品手册。（依据资料[1]）","timeline":[{"k":"trace","v":{"stage":"rewrite","query":"GTE-3000的工作温度是多少","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"[演示知识库(企业制度与产品)] 多查询扩展 +3","cost_ms":15,"hits":[]}},{"k":"trace","v":{"stage":"vector","query":"GTE-3000的工作温度是多少 | GTE-3000的工作温度是多少 | GTE-3000的工作温度是多少 的规格参数是多少 | GTE-3000的工作温度是多少 的常见问题与解决办法","scale":"cosine","scale_name":"余弦相似度","scale_range":"0~1","threshold":0.1,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"[演示知识库(企业制度与产品)] 4条查询×top8，4命中，阈值0.1过滤后1","cost_ms":25,"hits":[{"chunk_id":390,"parent_id":null,"score":0.2899,"scale":"cosine","rank":1,"preview":"# 光模块产品手册\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与"},{"chunk_id":393,"parent_id":null,"score":0.034,"scale":"cosine","rank":2,"preview":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每"},{"chunk_id":391,"parent_id":null,"score":0.0269,"scale":"cosine","rank":3,"preview":"4dBm，消光比大于 3.5dB。典型功耗为 1.2W，最大功耗 1.5W。接口类型为 LC 双工。## 4. 故障排查\n光功率过低的常见原因包括光接口污染、光"},{"chunk_id":395,"parent_id":null,"score":0.0123,"scale":"cosine","rank":4,"preview":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用"}]}},{"k":"trace","v":{"stage":"bm25","query":"GTE-3000的工作温度是多少 | GTE-3000的工作温度是多少 | GTE-3000的工作温度是多少 的规格参数是多少 | GTE-3000的工作温度是多少 的常见问题与解决办法","scale":"bm25","scale_name":"BM25分数","scale_range":"无上界","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"[演示知识库(企业制度与产品)] jieba分词4条查询×top8，1命中；分数无上界，本次不适用阈值","cost_ms":1,"hits":[{"chunk_id":390,"parent_id":null,"score":7.7466,"scale":"bm25","rank":1,"preview":""}]}},{"k":"trace","v":{"stage":"rrf","query":"","scale":"rrf","scale_name":"RRF名次分","scale_range":"约0.016~0.033","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"[演示知识库(企业制度与产品)] 两路名次融合 k=60，1候选；名次分约0.016~0.033，本次不适用阈值","cost_ms":0,"hits":[{"chunk_id":390,"parent_id":null,"score":0.0328,"scale":"rrf","rank":1,"preview":""}]}},{"k":"trace","v":{"stage":"backfill","query":"","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"[演示知识库(企业制度与产品)] 1子块候选回填为1个父块（小块用来找，大块用来答）","cost_ms":1,"hits":[{"chunk_id":389,"parent_id":389,"score":0.0328,"scale":"rrf","rank":1,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]}},{"k":"trace","v":{"stage":"rerank","query":"GTE-3000的工作温度是多少","scale":"rerank","scale_name":"重排相关分","scale_range":"0~1","threshold":0.02,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"[演示知识库(企业制度与产品)] 重排1条候选，阈值0.02过滤后保留1条","cost_ms":9,"hits":[{"chunk_id":389,"parent_id":389,"score":0.1512,"scale":"rerank","rank":1,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]}},{"k":"token","v":"针对「"},{"k":"token","v":"GTE"},{"k":"token","v":"-30"},{"k":"token","v":"00的"},{"k":"token","v":"工作温"},{"k":"token","v":"度是多"},{"k":"token","v":"少」："},{"k":"token","v":"# 光"},{"k":"token","v":"模块产"},{"k":"token","v":"品手册"},{"k":"token","v":"。（依"},{"k":"token","v":"据资料"},{"k":"token","v":"[1]"},{"k":"token","v":"）"},{"k":"refs","v":[{"rank":1,"chunk_id":389,"scores":{"cosine":0.2898897252050583,"bm25":null,"rerank":0.151222},"content":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与 25Gbps 两种速率档位，采用可热插拔的 SFP+ 封装，广泛应用于服务器网卡、交换机上行端口与存储网络。\n\n## 2. 工作温度范围\n光模块的工作温度范围是选型时最重要的环境指标。GTE-3000 系列提供两种温度等级：\n工业级光模块的工作温度范围为 -40℃ 到 85℃，存储温度范围为 -40℃ 到 85℃；\n商业级光模块的工作温度范围为 0℃ 到 70℃，存储温度范围为 -40℃ 到 85℃。\n当环境温度超出工作温度范围时，"}]}]},"pipeline":{"chailu":{"query_stages":[{"stage":"rewrite","query":"出差住宿费能报销多少","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"多查询扩展 +3","cost_ms":37,"hits":[]},{"stage":"vector","query":"出差住宿费能报销多少 | 出差住宿费能报销多少 | 出差住宿费能报销多少 的规格参数是多少 | 出差住宿费能报销多少 的常见问题与解决办法","scale":"cosine","scale_name":"余弦相似度","scale_range":"0~1","threshold":0.1,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"4条查询×top8，4命中，阈值0.1过滤后1","cost_ms":25,"hits":[{"chunk_id":395,"parent_id":null,"score":0.2337,"scale":"cosine","rank":1,"preview":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用"},{"chunk_id":390,"parent_id":null,"score":0.087,"scale":"cosine","rank":2,"preview":"# 光模块产品手册\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与"},{"chunk_id":391,"parent_id":null,"score":0.0094,"scale":"cosine","rank":3,"preview":"4dBm，消光比大于 3.5dB。典型功耗为 1.2W，最大功耗 1.5W。接口类型为 LC 双工。## 4. 故障排查\n光功率过低的常见原因包括光接口污染、光"},{"chunk_id":393,"parent_id":null,"score":0.0,"scale":"cosine","rank":4,"preview":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每"}]},{"stage":"bm25","query":"出差住宿费能报销多少 | 出差住宿费能报销多少 | 出差住宿费能报销多少 的规格参数是多少 | 出差住宿费能报销多少 的常见问题与解决办法","scale":"bm25","scale_name":"BM25分数","scale_range":"无上界","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"jieba分词4条查询×top8，2命中；分数无上界，本次不适用阈值","cost_ms":0,"hits":[{"chunk_id":395,"parent_id":null,"score":3.4652,"scale":"bm25","rank":1,"preview":""},{"chunk_id":390,"parent_id":null,"score":1.5145,"scale":"bm25","rank":2,"preview":""}]},{"stage":"rrf","query":"","scale":"rrf","scale_name":"RRF名次分","scale_range":"约0.016~0.033","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"两路名次融合 k=60，2候选；名次分约0.016~0.033，本次不适用阈值","cost_ms":0,"hits":[{"chunk_id":395,"parent_id":null,"score":0.0328,"scale":"rrf","rank":1,"preview":""},{"chunk_id":390,"parent_id":null,"score":0.0161,"scale":"rrf","rank":2,"preview":""}]},{"stage":"backfill","query":"","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"2子块候选回填为2个父块（小块用来找，大块用来答）","cost_ms":1,"hits":[{"chunk_id":394,"parent_id":394,"score":0.0328,"scale":"rrf","rank":1,"preview":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用"},{"chunk_id":389,"parent_id":389,"score":0.0161,"scale":"rrf","rank":2,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]},{"stage":"rerank","query":"出差住宿费能报销多少","scale":"rerank","scale_name":"重排相关分","scale_range":"0~1","threshold":0.02,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"重排2条候选，阈值0.02过滤后保留2条","cost_ms":8,"hits":[{"chunk_id":394,"parent_id":394,"score":0.2337,"scale":"rerank","rank":1,"preview":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用"},{"chunk_id":389,"parent_id":389,"score":0.0788,"scale":"rerank","rank":2,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]}],"contexts":[{"rank":1,"chunk_id":394,"scores":{"cosine":0.2337,"rerank":0.2337},"content":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用一律不予报销。\n\n## 2. 报销流程\n报销流程分为四个环节：填写报销单、直属主管审批、财务审核、银行打款。材料齐全的情况下，整个流程一般需要五个工作日完成。单笔金额超过 5000 元的费用，需分管领导额外签批。\n\n## 3. 差旅标准\n交通费按照职级对应标准执行，原则上选择经济舱与经济座。住宿费按城市等级分档：一线城市每晚上限 600 元，二线城市每晚上限 450 元，其他城市每晚上限 350 元。伙食补助每人每天 100 元。\n\n## 4. 发票要求\n报销必须提供发票原件与行程单。发票抬头须为公司全称，发票内容应与实际发生费用一致。虚报费用的，按公司制度严肃处理。"},{"rank":2,"chunk_id":389,"scores":{"rerank":0.0788},"content":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与 25Gbps 两种速率档位，采用可热插拔的 SFP+ 封装，广泛应用于服务器网卡、交换机上行端口与存储网络。\n\n## 2. 工作温度范围\n光模块的工作温度范围是选型时最重要的环境指标。GTE-3000 系列提供两种温度等级：\n工业级光模块的工作温度范围为 -40℃ 到 85℃，存储温度范围为 -40℃ 到 85℃；\n商业级光模块的工作温度范围为 0℃ 到 70℃，存储温度范围为 -40℃ 到 85℃。\n当环境温度超出工作温度范围时，光模块会出现光功率漂移、误码率上升甚至链路中断，因此户外机柜、边缘接入与工业现场应选用工业级模块。\n\n## 3. 关键参数\n发射光功率范围为 -8.2dBm 到 0.5dBm，接收灵敏度优于 -14.4dBm，消光比大于 3.5dB。典型功耗为 1.2W，最大功耗 1.5W。接口类型为 LC 双工。\n\n## 4. 故障排查\n光功率过低的常见原因包括光接口污染、光纤弯折半径不足、模块老化。建议排查顺序为：先用专用清洁笔清洁光接口，再用光功率计测量收发光功率，最后更换模块进行交叉验证。若清洁后仍不达标，请联系售后更换。"}],"strategy":"演示-混合检索(宽松阈值)"},"nianjia":{"query_stages":[{"stage":"rewrite","query":"年假可以休几天，怎么申请","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"多查询扩展 +3","cost_ms":27,"hits":[]},{"stage":"vector","query":"年假可以休几天，怎么申请 | 年假可以休几天，怎么申请 | 年假可以休几天，怎么申请 的规格参数是多少 | 年假可以休几天，怎么申请 的常见问题与解决办法","scale":"cosine","scale_name":"余弦相似度","scale_range":"0~1","threshold":0.1,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"4条查询×top8，4命中，阈值0.1过滤后1","cost_ms":24,"hits":[{"chunk_id":393,"parent_id":null,"score":0.2362,"scale":"cosine","rank":1,"preview":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每"},{"chunk_id":390,"parent_id":null,"score":0.0144,"scale":"cosine","rank":2,"preview":"# 光模块产品手册\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与"},{"chunk_id":395,"parent_id":null,"score":0.0071,"scale":"cosine","rank":3,"preview":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用"},{"chunk_id":391,"parent_id":null,"score":-0.031,"scale":"cosine","rank":4,"preview":"4dBm，消光比大于 3.5dB。典型功耗为 1.2W，最大功耗 1.5W。接口类型为 LC 双工。## 4. 故障排查\n光功率过低的常见原因包括光接口污染、光"}]},{"stage":"bm25","query":"年假可以休几天，怎么申请 | 年假可以休几天，怎么申请 | 年假可以休几天，怎么申请 的规格参数是多少 | 年假可以休几天，怎么申请 的常见问题与解决办法","scale":"bm25","scale_name":"BM25分数","scale_range":"无上界","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"jieba分词4条查询×top8，2命中；分数无上界，本次不适用阈值","cost_ms":1,"hits":[{"chunk_id":393,"parent_id":null,"score":3.0585,"scale":"bm25","rank":1,"preview":""},{"chunk_id":390,"parent_id":null,"score":1.5145,"scale":"bm25","rank":2,"preview":""}]},{"stage":"rrf","query":"","scale":"rrf","scale_name":"RRF名次分","scale_range":"约0.016~0.033","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"两路名次融合 k=60，2候选；名次分约0.016~0.033，本次不适用阈值","cost_ms":0,"hits":[{"chunk_id":393,"parent_id":null,"score":0.0328,"scale":"rrf","rank":1,"preview":""},{"chunk_id":390,"parent_id":null,"score":0.0161,"scale":"rrf","rank":2,"preview":""}]},{"stage":"backfill","query":"","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"2子块候选回填为2个父块（小块用来找，大块用来答）","cost_ms":1,"hits":[{"chunk_id":392,"parent_id":392,"score":0.0328,"scale":"rrf","rank":1,"preview":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每"},{"chunk_id":389,"parent_id":389,"score":0.0161,"scale":"rrf","rank":2,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]},{"stage":"rerank","query":"年假可以休几天，怎么申请","scale":"rerank","scale_name":"重排相关分","scale_range":"0~1","threshold":0.02,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"重排2条候选，阈值0.02过滤后保留1条","cost_ms":8,"hits":[{"chunk_id":392,"parent_id":392,"score":0.2362,"scale":"rerank","rank":1,"preview":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每"},{"chunk_id":389,"parent_id":389,"score":0.0,"scale":"rerank","rank":2,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]}],"contexts":[{"rank":1,"chunk_id":392,"scores":{"cosine":0.2362,"rerank":0.2362},"content":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每日上下班均需在考勤系统中打卡。迟到超过 30 分钟计为旷工半天，一个月内累计迟到 3 次以上将影响当月绩效。\n\n## 2. 年假\n员工入职满一年享有 5 天带薪年假，满三年享有 10 天，满五年及以上享有 15 天。年假需提前三个工作日在系统中提交申请，由直属主管审批通过后方可休假。当年未休完的年假最多可结转 5 天至次年第一季度，逾期作废。\n\n## 3. 病假与事假\n病假需提供二级以上医院出具的病假证明，病假期间按基本工资的 80% 计发。事假为无薪假，全年累计不得超过 15 天。\n\n## 4. 加班与调休\n因工作需要加班的，需提前提交加班申请。工作日加班可申请调休或加班费，休息日加班优先安排调休，法定节假日加班按国家规定支付三倍工资。"}],"strategy":"演示-混合检索(宽松阈值)"},"gte":{"query_stages":[{"stage":"rewrite","query":"GTE-3000支持哪些速率","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"多查询扩展 +3","cost_ms":16,"hits":[]},{"stage":"vector","query":"GTE-3000支持哪些速率 | GTE-3000支持哪些速率 | GTE-3000支持哪些速率 的规格参数是多少 | GTE-3000支持哪些速率 的常见问题与解决办法","scale":"cosine","scale_name":"余弦相似度","scale_range":"0~1","threshold":0.1,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"4条查询×top8，4命中，阈值0.1过滤后1","cost_ms":24,"hits":[{"chunk_id":390,"parent_id":null,"score":0.1186,"scale":"cosine","rank":1,"preview":"# 光模块产品手册\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps 与"},{"chunk_id":391,"parent_id":null,"score":0.0105,"scale":"cosine","rank":2,"preview":"4dBm，消光比大于 3.5dB。典型功耗为 1.2W，最大功耗 1.5W。接口类型为 LC 双工。## 4. 故障排查\n光功率过低的常见原因包括光接口污染、光"},{"chunk_id":395,"parent_id":null,"score":0.0072,"scale":"cosine","rank":3,"preview":"# 费用报销管理办法\n\n## 1. 报销时限\n差旅费需在出差结束后的十个工作日内提交报销申请，超过时限的原则上不予受理。其他费用应在费用发生当月提交，跨年度费用"},{"chunk_id":393,"parent_id":null,"score":-0.0123,"scale":"cosine","rank":4,"preview":"# 员工考勤与假期管理制度\n\n## 1. 工作时间与打卡\n公司实行标准工时制，工作时间为每日 9:00 至 18:00，午休 12:00 至 13:00。员工每"}]},{"stage":"bm25","query":"GTE-3000支持哪些速率 | GTE-3000支持哪些速率 | GTE-3000支持哪些速率 的规格参数是多少 | GTE-3000支持哪些速率 的常见问题与解决办法","scale":"bm25","scale_name":"BM25分数","scale_range":"无上界","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"jieba分词4条查询×top8，1命中；分数无上界，本次不适用阈值","cost_ms":0,"hits":[{"chunk_id":390,"parent_id":null,"score":6.9457,"scale":"bm25","rank":1,"preview":""}]},{"stage":"rrf","query":"","scale":"rrf","scale_name":"RRF名次分","scale_range":"约0.016~0.033","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"两路名次融合 k=60，1候选；名次分约0.016~0.033，本次不适用阈值","cost_ms":0,"hits":[{"chunk_id":390,"parent_id":null,"score":0.0328,"scale":"rrf","rank":1,"preview":""}]},{"stage":"backfill","query":"","scale":"none","scale_name":"-","scale_range":"-","threshold":null,"threshold_applies":false,"threshold_note":"本次不适用（量纲不可比）","note":"1子块候选回填为1个父块（小块用来找，大块用来答）","cost_ms":1,"hits":[{"chunk_id":389,"parent_id":389,"score":0.0328,"scale":"rrf","rank":1,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]},{"stage":"rerank","query":"GTE-3000支持哪些速率","scale":"rerank","scale_name":"重排相关分","scale_range":"0~1","threshold":0.02,"threshold_applies":true,"threshold_note":"按量纲配置阈值","note":"重排1条候选，阈值0.02过滤后保留0条","cost_ms":10,"hits":[{"chunk_id":389,"parent_id":389,"score":0.0,"scale":"rerank","rank":1,"preview":"# 光模块产品手册\n\n## 1. 产品概述\n本手册适用于 GTE-3000 系列光模块，用于数据中心内部与数据中心之间的高速互联。该系列产品支持 10Gbps "}]}],"contexts":[],"strategy":"演示-混合检索(宽松阈值)"}}}</script>
+<script>
+const D = JSON.parse(document.getElementById('demo-data').textContent);
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1600)}
+
+/* ============ 问答模拟回放 ============ */
+const DIALOGS = {
+  agent:  { q:'出差住宿费能报销多少？', d:D.dialog_agent,  tag:'Agentic RAG' },
+  normal: { q:'GTE-3000 的工作温度是多少？', d:D.dialog_normal, tag:'单轮混合检索' },
+};
+let playing = false;
+
+function addMsg(role, html){
+  const m = document.createElement('div');
+  m.className = 'msg ' + (role==='user'?'user':'');
+  m.innerHTML = `<div class="avatar ${role==='user'?'hu':'ai'}">${role==='user'?'我':'AI'}</div><div class="bubble">${html}</div>`;
+  $('#msgs').appendChild(m);
+  $('#msgs').scrollTop = 1e9;
+  return m;
+}
+function stepHTML(s, i){
+  return `<div class="step" id="stp-${i}"><span class="ic">▸</span><b>${esc(s.node_cn||s.node)}</b><span>${esc(s.action||'')}</span><span class="ms">${s.cost_ms!=null?s.cost_ms+'ms':''}</span></div>`;
+}
+
+async function playDialog(key, chip){
+  if(playing) return; playing = true;
+  $$('.q-chip').forEach(c=>c.classList.remove('active')); chip && chip.classList.add('active');
+  $('#hint').classList.remove('show');
+  const {q, d} = DIALOGS[key];
+  addMsg('user', esc(q));
+  await sleep(500);
+  const holder = addMsg('ai', '<div class="steps" id="steps"></div><div id="ans" style="margin-top:10px"></div><div id="refs"></div><div id="cost" style="margin-top:8px"></div>');
+  const stepsEl = holder.querySelector('#steps');
+  const ansEl = holder.querySelector('#ans');
+  const refsEl = holder.querySelector('#refs');
+  const costEl = holder.querySelector('#cost');
+
+  let stepIdx = 0, tokensDone = false, refShown = false;
+  // 按真实事件顺序回放：step→(token 流)→step→refs→done
+  let tokenBuf = [];
+  const flushTokens = async () => {
+    if(!tokenBuf.length) return;
+    for (const tk of tokenBuf){
+      ansEl.innerHTML = esc(tokenBuf.slice(0, tokenBuf.indexOf(tk)+1).join('')) + '<span class="cursor"></span>';
+      $('#msgs').scrollTop = 1e9;
+      await sleep(120);
+    }
+    ansEl.innerHTML = esc(tokenBuf.join(''));
+    tokenBuf = [];
+  };
+  for (const ev of d.timeline){
+    if (ev.k === 'step'){
+      await flushTokens();
+      stepsEl.insertAdjacentHTML('beforeend', stepHTML(ev.v, stepIdx++));
+      $('#msgs').scrollTop = 1e9;
+      await sleep(650);
+    } else if (ev.k === 'token'){
+      tokenBuf.push(ev.v);
+      if (tokenBuf.length === 1){ // first token: start typing immediately in mini-bursts
+        await sleep(200);
+      }
+    } else if (ev.k === 'refs'){
+      await flushTokens();
+      const refs = ev.v.map(r=>{
+        const sc=[];
+        if(r.scores&&r.scores.cosine!=null)sc.push(`<span class="score-tag">余弦 ${r.scores.cosine.toFixed(3)}</span>`);
+        if(r.scores&&r.scores.rerank!=null)sc.push(`<span class="score-tag">重排 ${r.scores.rerank.toFixed(3)}</span>`);
+        return `<div class="ref-item"><div class="rt"><span class="no">[${r.rank}]</span><span style="color:var(--text3)">chunk #${r.chunk_id}</span>${sc.join('')}</div><div class="rc">${esc((r.content||'').slice(0,180))}…</div></div>`;
+      }).join('');
+      refsEl.innerHTML = `<div class="refs-box" id="rb"><div class="refs-head" onclick="document.getElementById('rb').classList.toggle('open')">📄 引用来源（${ev.v.length}）<span class="arr">›</span></div><div class="refs-body">${refs}</div></div>`;
+      refShown = true;
+      await sleep(400);
+    }
+  }
+  await flushTokens();
+  if (d.cost_ms!=null) costEl.innerHTML = `<div class="cost-line">⚡ 完成 · 总耗时 ${d.cost_ms}ms · ${d.app||''}</div>`;
+  $('#msgs').scrollTop = 1e9;
+  playing = false;
+}
+
+$('#send').addEventListener('click', ()=>{
+  if(playing){toast('正在回放中，请稍候…');return}
+  const v = $('#inp').value.trim();
+  if(!v) return;
+  addMsg('user', esc(v));
+  $('#inp').value='';
+  setTimeout(()=>{
+    const h=$('#hint');
+    h.innerHTML='💡 在线页面是<b>真实运行数据回放</b>，仅内置了左侧示例问题的完整过程。要任意提问，请按下方「本地部署」三步启动完整系统，或阅读 GitHub README。';
+    h.classList.add('show');
+    addMsg('ai','这个问题我很想现场回答，但本页是静态演示（真实运行数据回放）。请点击左侧示例体验完整流程，或按页面底部指引本地部署后任意提问 🙂').querySelector('.bubble');
+  },400);
+});
+$('#inp').addEventListener('keydown',e=>{if(e.key==='Enter')$('#send').click()});
+$$('.q-chip[data-q]').forEach(c=>c.addEventListener('click',()=>playDialog(c.dataset.q,c)));
+
+/* ============ 检索管线回放 ============ */
+const STAGE_CN = {rewrite:'查询改写',vector:'向量召回',bm25:'BM25 召回',rrf:'RRF 融合',backfill:'父子回填',rerank:'重排'};
+const SCALE_CLS = {cosine:'sc-cosine',bm25:'sc-bm25',rrf:'sc-rrf',rerank:'sc-rerank',none:'sc-none'};
+let pipePlaying=false, pipeSel='chailu';
+
+function renderStages(traces){
+  $('#stages').innerHTML = traces.map((t,i)=>`
+    <div class="stage" id="stg-${i}">
+      <div class="sname">${i+1}. ${STAGE_CN[t.stage]||t.stage}</div>
+      <div class="sscale ${SCALE_CLS[t.scale]||'sc-none'}">${t.scale_name&&t.scale_name!=='-'?esc(t.scale_name):'—'}</div>
+      <div class="sinfo">${t.threshold_applies?('阈值 '+t.threshold):'不适用阈值'}</div>
+      <div class="sms" id="stgms-${i}"></div>
+    </div>`).join('');
+  $('#pipe-detail').innerHTML='';
+  $('#final-ctx').innerHTML='';
+  $('#pipe-strategy').textContent = '策略：' + (D.pipeline[pipeSel].strategy||'');
+}
+async function playPipe(){
+  if(pipePlaying)return; pipePlaying=true;
+  const P = D.pipeline[pipeSel];
+  const traces = P.query_stages;
+  renderStages(traces);
+  for(let i=0;i<traces.length;i++){
+    const t=traces[i];
+    await sleep(520);
+    const el=$('#stg-'+i); if(el)el.classList.add('lit');
+    const ms=$('#stgms-'+i); if(ms)ms.textContent=(t.hits&&t.hits.length?t.hits.length+' 命中 · ':'')+t.cost_ms+'ms';
+    $('#pipe-detail').innerHTML=`
+      <div class="pd-head"><b>${STAGE_CN[t.stage]||t.stage}</b>
+        <span class="sscale ${SCALE_CLS[t.scale]||'sc-none'}">${t.scale_name&&t.scale_name!=='-'?esc(t.scale_name):'—'}${t.scale_range&&t.scale_range!=='-'?'（'+esc(t.scale_range)+'）':''}</span>
+        <span style="font-size:12px;color:var(--text3)">${t.threshold_applies?('阈值 '+t.threshold+' · '+esc(t.threshold_note||'')):esc(t.threshold_note||'本次不适用阈值')}</span>
+      </div>
+      <div class="pd-note">${esc(t.note)}</div>
+      ${t.hits&&t.hits.length?`<div class="pd-hits">${t.hits.map(h=>`
+        <div class="hit-row"><span class="rk">#${h.rank}</span><span class="hs" style="color:var(--primary-d)">${h.score}</span><span class="hp">${esc((h.preview||'').replace(/\n/g,' ').slice(0,70))||'（chunk #'+h.chunk_id+'）'}</span></div>`).join('')}</div>`:''}`;
+    await sleep(700);
+  }
+  const ctxs=P.contexts;
+  if(ctxs&&ctxs.length){
+    $('#final-ctx').innerHTML=`<h4>最终召回上下文（供大模型生成答案）</h4>`+ctxs.map(c=>{
+      const sc=[];
+      if(c.scores.cosine!=null)sc.push(`<span class="score-tag">余弦 ${c.scores.cosine.toFixed(3)}</span>`);
+      if(c.scores.rerank!=null)sc.push(`<span class="score-tag">重排 ${c.scores.rerank.toFixed(3)}</span>`);
+      return `<div class="ctx-card"><div class="ct"><span class="no" style="background:#ecf5ff;color:var(--primary);border-radius:4px;padding:0 6px;font-size:11.5px;font-weight:600">[${c.rank}]</span><span style="color:var(--text3);font-size:12px">chunk #${c.chunk_id}</span>${sc.join('')}</div><div class="cc">${esc((c.content||'').slice(0,240))}…</div></div>`;
+    }).join('');
+  } else {
+    $('#final-ctx').innerHTML=`<div class="empty-ctx"><b>⚠ 本轮重排后没有片段通过阈值</b><br>
+      这是一条<b>真实的边界案例</b>：召回候选的重排相关分均低于策略阈值 <code>rerank_threshold</code>，系统会如实返回空上下文，而不是硬塞低相关片段。这体现了量纲阈值过滤的作用 —— 宁可承认"资料不足"，也不让噪声污染答案。</div>`;
+  }
+  pipePlaying=false;
+}
+$$('.q-chip[data-p]').forEach(c=>c.addEventListener('click',()=>{
+  $$('.q-chip[data-p]').forEach(x=>x.classList.remove('active'));c.classList.add('active');
+  pipeSel=c.dataset.p;renderStages(D.pipeline[pipeSel].query_stages);playPipe();
+}));
+$('#pipe-play').addEventListener('click',playPipe);
+// 初始渲染 + 默认选中第一条
+$$('.q-chip[data-p]')[0].classList.add('active');
+renderStages(D.pipeline.chailu.query_stages);
+
+/* ============ 截图 ============ */
+const SHOTS=[
+  ['01_dashboard.png','系统首页 · 数据看板'],
+  ['02_knowledge_base.png','知识库管理'],
+  ['03_documents.png','文档管理 · 上传解析入库'],
+  ['04_chunks.png','片段管理 · 人工修正与重建向量'],
+  ['05_retrieval_test.png','检索测试 · 单次检查/四套并排对比'],
+  ['06_agent_run.png','Agent 运行记录 · 时间线回放'],
+  ['07_eval.png','效果评测 · 四指标量化评分'],
+  ['08_chat_app.png','问答应用管理'],
+  ['09_chat_portal.png','智能问答门户 · Agentic 全过程'],
+  ['10_chat_portal_2.png','智能问答门户 · 引用来源与耗时'],
+  ['login.png','登录页'],
+];
+$('#shots').innerHTML=SHOTS.map(([f,c])=>`<div class="shot" data-f="shots/${f}"><img src="shots/${f}" loading="lazy" alt="${c}"><div class="cap">${c}</div></div>`).join('');
+$('#shots').addEventListener('click',e=>{
+  const s=e.target.closest('.shot');if(!s)return;
+  $('#lb-img').src=s.dataset.f;$('#lightbox').classList.add('show');
+});
+$('#lightbox').addEventListener('click',()=>$('#lightbox').classList.remove('show'));
+</script>
+</body>
+</html>

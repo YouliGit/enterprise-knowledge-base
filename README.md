@@ -13,6 +13,8 @@
 [![Tests](https://img.shields.io/badge/tests-143%2F143-brightgreen)](#-测试)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
+> ▶ **[在线体验（交互式演示）](https://youligit.github.io/enterprise-knowledge-base/demo/)** —— 无需部署，直接在浏览器中回放真实的检索管线与 Agentic 问答过程（含 6 阶段量纲追踪、逐字流式输出、引用来源）。也可以直接打开仓库内的 [`demo/index.html`](demo/index.html)。
+
 ---
 
 ## ⚠️ 安全警告（部署前必读）
