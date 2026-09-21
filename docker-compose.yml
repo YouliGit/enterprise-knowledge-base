@@ -1,0 +1,130 @@
+# ============================================================
+#  AI Agentic RAG 企业知识库平台 —— Docker 编排（完全 Docker 化运行）
+#  服务：mysql(业务库) + pgvector(向量库) + backend(FastAPI) + frontend(Vue/nginx)
+#  用法（在 ai_system/ 目录下）：
+#    docker compose up -d --build
+#  访问： http://localhost:8080      （前端，admin/admin）
+#        http://localhost:9090/docs  （后端 Swagger）
+#
+#  国内镜像说明：若拉取超时，可将镜像名前加 daocloud.io/ 前缀，
+#  例如 mysql:8 → daocloud.io/library/mysql:8
+#  （离线/网络受限时见根目录《未完成清单.txt》）
+# ============================================================
+
+services:
+  # ---------- MySQL 业务库 ----------
+  mysql:
+    image: docker.m.daocloud.io/library/mysql:8
+    container_name: ai_mysql
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: ai_system
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./sql/ai_system.sql:/docker-entrypoint-initdb.d/01-ai_system.sql:ro
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123456"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # ---------- PostgreSQL + PGVector 向量库 ----------
+  pgvector:
+    image: docker.m.daocloud.io/pgvector/pgvector:pg16
+    container_name: ai_pgvector
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_PASSWORD: root123456
+      POSTGRES_DB: vector_store
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./sql/pgvector_init.sql:/docker-entrypoint-initdb.d/01-pgvector_init.sql:ro
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # ---------- 后端 FastAPI ----------
+  backend:
+    build:
+      context: ./fastapi-app
+    container_name: ai_backend
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root123456
+      MYSQL_DB: ai_system
+      PG_HOST: pgvector
+      PG_PORT: "5432"
+      PG_USER: postgres
+      PG_PASSWORD: root123456
+      PG_DB: vector_store
+      EMBEDDING_DIM: "1024"
+      JWT_SECRET: ai-system-secret-please-change
+      APP_PORT: "9090"
+      # 百炼 Key 留空：需用户自行购买后填写（见根目录《未完成清单.txt》）
+      DASHSCOPE_API_KEY: ""
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      pgvector:
+        condition: service_healthy
+
+  # ---------- 前端 Vue + Nginx ----------
+  frontend:
+    build:
+      context: ./vue
+    container_name: ai_frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  # ---------- Mock 大模型服务（测试沙箱专用） ----------
+  # 真实推理走阿里云百炼（付费）。本服务在沙箱内假扮 chat/embedding/rerank 三家云端模型，
+  # 让「向量化入库 → 混合检索 → 重排 → 问答 → Agent → 评测」全链路离线可跑、可重复、可断言。
+  # 只在 --profile test 下启动，不影响正常部署：
+  #   docker compose --profile test up -d --build
+  mock-llm:
+    build:
+      context: ./mock-llm
+    image: ai_system-mock-llm:latest
+    container_name: ai_mock_llm
+    restart: unless-stopped
+    profiles: ["test"]
+    environment:
+      TZ: Asia/Shanghai
+      MOCK_PORT: "8000"
+      MOCK_EMBED_DIM: "1024"
+    ports:
+      - "127.0.0.1:8898:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:
+  pg_data:

@@ -1,0 +1,111 @@
+════════════════════════════════════════════════════════════════
+ 2026-09-21 工作汇报 —— AI Agentic RAG 企业知识库平台
+ （主题：软件测试 · 缺陷修复 · 代码逻辑优化 · 全链路沙箱验证）
+════════════════════════════════════════════════════════════════
+
+## ✅ 本轮完成内容
+
+【1. 搭建「零成本可离线」的测试环境（新增第 5 个容器）】
+  - ai_system/mock-llm/server.py：纯 Python 标准库实现的大模型沙箱
+      * POST /v1/chat/completions —— OpenAI 兼容，支持 stream 流式 + tool_calls
+      * POST /v1/embeddings —— 确定性 hashing-trick 向量化（同文本恒得同向量）
+      * POST /api/v1/services/rerank/... —— DashScope 兼容重排
+      * /_control —— 故障注入 + 调用计数（用于验证降级路径）
+  - docker-compose.yml 增加 mock-llm 服务，用 profiles:["test"] 隔离
+  - 价值：无需百炼付费 Key 即可完整验证「配模型→入库→检索→问答→Agent→评测」
+
+【2. 建立自动化测试体系（ai_system/tests/，纯标准库，可重复执行）】
+  - harness.py       极简 HTTP/SSE 客户端 + 用例登记汇总（结果落 JSON）
+  - static_check.py  AST 静态分析：找出「引用未导入的全局名」
+                     （本项目 try/except 兜底会静默吞掉 NameError，这是唯一防线）
+  - suite_api.py     接口层 111 条用例（登录/权限/用户/知识库/策略/对话/
+                     评测/仪表盘/契约/安全/历史缺陷回归 共 12 组）
+  - suite_e2e.py     端到端 32 条用例（9 组，串起真实业务全链路）
+
+【3. 测试执行结果（真实运行，非静态审阅）】
+  - 接口层：106/111  →  111/111  ✅
+  - 端到端：8/32 → 17/32 → 26/32 → 28/32 → 29/32 → 31/32 → 32/32  ✅
+  - AST 静态检查：42 文件，1 处可疑引用 → 0 处  ✅
+  - 合计 143 条用例全部通过，Mock 调用 0 error
+
+【4. 修复 13 项产品缺陷（含 3 项 P0 阻断级）】
+  ★ P0-1 文档入库 100% 失败（最严重）
+     现象：任何文档上传后必失败，报 kb_vectors.chunk_id 非空约束被违反
+     根因：Tortoise ORM 0.21.7 + MySQL 下 bulk_create 不回填自增主键
+          （仅 PostgreSQL 支持 RETURNING），导致向量 chunk_id=NULL、
+           子块 parent_id=NULL
+     修复：新增 _fetch_ids() 按 doc_id+is_parent+seq 回查真实主键并校验条数
+     影响：这是知识库产品最核心功能，此前完全不可用
+
+  ★ P0-2 整条检索链路崩溃
+     现象：检索测试/问答/Agent 全部 500
+     根因：retriever._backfill_stage 用了 strategy.candidate_limit，
+          但函数签名未接收 strategy → NameError
+     修复：签名补 strategy 参数 + 调用点补传
+
+  ★ P0-3 Mock 沙箱 SSE 响应永久挂起
+     现象：astream 调用永久阻塞，脚本被强杀
+     根因：声明 protocol_version="HTTP/1.1"，但 SSE 响应既无
+          Content-Length 也无 Transfer-Encoding，客户端等不到响应结束
+     修复：改分块传输编码（chunked）
+
+  ☆ P1 级（共 9 项，详见《测试报告.md》第四节）
+     - Agent 自查节点从未真正执行（NameError 被 except 静默吞掉）
+     - 工具/Prompt 模糊查询 500（QuerySet|QuerySet 不被 Tortoise 支持）
+     - 脏工具配置拖垮整条问答/Agent 链路（Unsupported function {}）
+     - Agent 图无限循环（GraphRecursionError: 25）
+     - Agent 时间线 seq 全为 [1,1,1,1]（LangGraph state 副本问题）
+     - 自查失败后无限重试
+     - SSE 异常时 agent_run 卡 running 且错误消息为空
+     - 并发上传后台任务被 GC 回收（文档永久卡 parsing）
+     - 片段人工修正被静默还原（用户编辑数据丢失）
+
+  ☆ P2 级（1 项）
+     - 「流式问答」实际不流式（有工具时恒走非流式，只发 1 个 token 事件）
+     - 已改为：工具轮非流式（拿 tool_calls 更稳）+ 最终作答轮 astream 逐字推送
+
+【5. 修正 5 项测试侧问题（非产品缺陷，一并披露）】
+  - harness SSE 逐字节 decode 撕裂多字节中文 → 改增量解码器
+  - E2E-9.1 轮询把 parsing 当作已收敛 → 改为必须全部进入终态
+  - D11 搜索已被改掉的旧昵称 / D10 期望与设计不符 / delta 空值保护
+
+【6. 文档产出】
+  - 《测试报告.md》全面重写：环境/用例设计/执行结果/13 缺陷详单（含证据）/
+    亮点专项（量纲显式化、BM25 兜底、LLM-as-judge、安全测试）/结论/复现方式
+  - 《项目进度.txt》新增 2026-09-21 全天明细 + 「新增/修订的设计口径」备忘录
+  - 《未完成清单.txt》更新全链路验证状态
+
+════════════════════════════════════════════════════════════════
+
+## 📌 关键技术备忘（本轮踩坑总结，改造代码时注意）
+
+  1. Tortoise ORM + MySQL：bulk_create 不回填自增主键，批量插入后需用主键
+     建关联的场景必须回查（rag/ingest.py::_fetch_ids）
+  2. asyncio 后台任务必须保存强引用，否则事件循环只持弱引用，任务被 GC 回收
+  3. 保存内容后要重新向量化，必须「先落库再 reembed」，否则编辑会被旧值覆盖
+  4. HTTP/1.1 的 SSE 响应必须有 Transfer-Encoding: chunked
+  5. LangGraph 节点拿到的是 state 副本，节点内改动不回流 → 需从库中取真实值
+  6. 测试 SSE 必须用增量解码，逐字节 decode 会撕裂中文
+  7. 测试轮询文档状态必须等「全部进入终态」，parsing 不算收敛
+
+════════════════════════════════════════════════════════════════
+
+## ⏸ 当前状态
+
+  5 个容器全部正常运行：
+    - ai_mysql    : Up (healthy)   0.0.0.0:3307→3306
+    - ai_pgvector : Up (healthy)   0.0.0.0:5432→5432
+    - ai_backend  : Up             0.0.0.0:9090→9090
+    - ai_frontend : Up             0.0.0.0:8080→80
+    - ai_mock_llm : Up (healthy)   127.0.0.1:8898→8000   ← 本轮新增
+
+  测试状态：143/143 全部通过（接口 111 + 端到端 32），静态检查 0 异常
+
+## 下一步建议
+
+  1. 【用户操作】购买百炼 API Key → 管理端「AI模型配置」填三类模型 Key → 点测试
+     （这也是唯一需要人工介入的一步；其余链路已由沙箱验证通过）
+  2. 【可选】为前端 Vue 页面补充端到端 UI 测试（本轮聚焦后端接口与全链路）
+  3. 【可选】把「Docker 沙箱 Mock 大模型全链路测试」沉淀为可复用技能
+
+════════════════════════════════════════════════════════════════

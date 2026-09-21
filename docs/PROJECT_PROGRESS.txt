@@ -1,0 +1,234 @@
+════════════════════════════════════════════════════════════════
+ AI Agentic RAG 企业级知识库平台 —— 项目进度跟踪
+  （基于 FastAPI + LangChain + LangGraph + RAG + PGVector，前后端分离）
+════════════════════════════════════════════════════════════════
+■ 说明：
+  1. 每完成一小步就更新本文件，供下次会话恢复上下文继续干活
+  2. 付费/大文件依赖（百炼 API Key 等）一律留空，见《未完成清单.txt》
+  3. 全部下载走国内源（pip 阿里源 / npm npmmirror / apt 清华源 / Docker 镜像 daocloud）
+  4. 只在 D:\linshidaimaaaaaaaaa\企业知识库 文件夹内工作
+  5. 项目完全在 Docker 中运行（宿主机不装项目依赖）
+
+────────────────────────────────────────────────────────
+【总体里程碑】
+  [x] 1. 解读需求文档（文档.docx）：技术栈/目录结构/启动步骤/核心设计/接口清单
+  [x] 2. 提取文档 7 张界面截图到 _ref_images/ 作 UI 参考
+  [x] 3. Docker 环境：Desktop 4.91 已装；WSL2 内核已装 + Docker Desktop 启动成功
+  [x] 4. 后端 fastapi-app 代码（全部完成，42 个 .py 语法检查通过）
+  [x] 5. 前端 vue 代码（全部页面完成，build 验证待 Docker 就绪）
+  [x] 6. SQL：ai_system.sql + pgvector_init.sql（已完成，ai_system/sql/）
+  [x] 7. Docker 化：backend/frontend Dockerfile + docker-compose.yml + 一键脚本（已写好，待构建）
+  [x] 8. 《未完成清单.txt》（付费/大文件项留空说明，已完成，见根目录）
+  [x] 9. 本地验证：py 语法检查全部通过；前端 npm build 验证通过（vite build in 15.98s）
+  [x] 10. docker compose 构建启动 + 验证启动步骤（文档三）—— 4 容器全部运行，admin 登录成功
+────────────────────────────────────────────────────────
+
+【2026-09-20 全天进度明细】
+
+◆ 已完成 —— 后端 ai_system/fastapi-app/ 全部代码：
+  [x] requirements.txt        依赖清单（langchain/langgraph/tortoise/asyncpg/jieba 等）
+  [x] settings.py             MySQL/PGVector/JWT/百炼配置（环境变量可覆盖）
+  [x] models.py               25 张业务表 Tortoise ORM 模型（user→sys_config）
+  [x] common/                 统一返回 response.py / 异常 exceptions.py /
+                               JWT+密码 security.py / 依赖 deps.py / 分页 utils.py
+  [x] rag/schemas.py          StageTrace 阶段追踪（量纲显式化：cosine/bm25/rrf/rerank）
+  [x] rag/llm.py              模型工厂（配置存MySQL改完即生效）+ Prompt 渲染 + 11个内置模板
+  [x] rag/rerank.py           自写 BaseDocumentCompressor（gte-rerank-v2 百炼原生接口）
+  [x] rag/bm25.py             jieba 中文分词 BM25（smart_tokenize 拆 GTE3000→gte/3000）
+  [x] rag/fusion.py           RRF 倒数排名融合
+  [x] rag/vectorstore.py      PGVector 异步访问（asyncpg，kb_vectors 单表）
+  [x] rag/splitter.py         递归分块 / 父子分块（小块找、大块答）
+  [x] rag/parser.py           PDF/Word/Excel/MD/TXT 解析 + OCR 兜底（OCR 可选依赖）
+  [x] rag/rewrite.py          多查询扩展 / 指代消解 / HyDE
+  [x] rag/retriever.py        混合检索主管道（改写→向量∥BM25→RRF→父块回填→重排，全程 StageTrace）
+  [x] rag/qa.py               问答生成（真·逐token流式 + Function Calling 工具循环）
+  [x] rag/tools.py            工具中心（计算器/当前时间/知识库检索 3 个内置工具）
+  [x] rag/graph.py            LangGraph Agentic RAG 状态图（检索→评估→改写→再检索→生成→自查）
+  [x] rag/judge.py            LLM-as-judge 四指标（裁判 temperature=0）
+  [x] rag/ingest.py           文档入库管道（解析→切分→子块向量化→统计）
+  [x] api/ 共 20 个路由模块（auth/users/dashboard/ai_model/prompt/tool/
+                             knowledge_base/split_strategy/retrieval_strategy/
+                             document/chunk/retrieval/agent/chat_app/chat/eval）
+  [x] main.py                 入口（MySQL+PGVector 初始化、admin/admin 种子、路由自动扫描）
+  [x] 语法检查：python -m py_compile 全部 42 个 .py —— 0 失败 ✅
+
+◆ 已完成 —— SQL 脚本（ai_system/sql/）：
+  [x] ai_system.sql           25 表完整 DDL（utf8mb4，与 models.py 一一对应）
+                              种子数据不写死：admin/admin + 默认策略由后端首启自动创建
+  [x] pgvector_init.sql       CREATE EXTENSION vector + kb_vectors 单表(vector 1024) + 索引
+                              与 rag/vectorstore.py init_pgvector 幂等等价
+
+◆ 已完成 —— 前端 ai_system/vue/（17 个页面/组件）：
+  [x] 工程骨架：package.json / vite.config.js / .env.* / .npmrc(淘宝源) / index.html
+  [x] request.js Axios 封装（{code,msg,data} + Token 注入 + 401 登出）
+  [x] sse.js   POST + 流式解析 SSE（onEvent/onDone/onError，支持 Abort）
+  [x] store/auth.js 全局登录态（localStorage 持久化，无需 Pinia）
+  [x] router   hash 路由 + 登录/管理员守卫 + 15 个管理子路由 + 问答路由
+  [x] AdminLayout   管理端布局（侧边菜单/顶栏/个人资料/改密码/退出）
+  [x] Login    登录 + 注册（admin/admin 提示）
+  [x] Dashboard    首页统计（12 指标卡片 + ECharts 饼图 + 架构概览 + 待办提醒）
+  [x] AiModel      AI 模型配置（三类 + 测试连通 + 启停 + Key 留空提示）
+  [x] Prompt       Prompt 模板（内置模板导入 + 场景标签）
+  [x] Tool         工具中心（内置导入 + 手动测试 + 调用日志 tab）
+  [x] KnowledgeBase 知识库（列表/新建/编辑/重建索引/批量删除）
+  [x] DocManage    文档管理（拖传/多选上传/解析状态轮询/重解析/批量删）
+  [x] ChunkManage  片段管理（按文档筛选/人工修正重新向量化/启停）
+  [x] SplitStrategy 切分策略（父子/递归，大小与重叠参数）
+  [x] RetrievalStrategy 检索策略（矢量/B25/RRF/改写/双阈值按量纲分开配）
+  [x] RetrievalTest 检索测试 + 召回调试台（StageTrace 时间线 + 最多4套并排）
+  [x] ChatAppManage 问答应用管理（绑定知识库/Prompt/模型/策略/Agent模式）
+  [x] AgentRun     Agent 运行记录 + 时间线回放（节点/thought/输入输出 JSON）
+  [x] Eval         评测集管理 + 批量测评（四指标）+ 策略对比看板（3 tab）
+  [x] UserManage   用户管理（管理员可增删改/禁用/重置密码）
+  [x] OperationLog 操作日志
+  [x] ChatView     用户端问答（会话列表 + SSE 流式打字 + 引用表格 + 赞/踩反馈）
+
+◆ 已完成 —— Docker 化（ai_system/）：
+  [x] fastapi-app/Dockerfile   python:3.11-slim + pip 阿里源
+  [x] vue/Dockerfile           多阶段：node:20-alpine 构建(淘宝源) → nginx:alpine
+  [x] vue/nginx.conf           静态托管 + /api 反代 + SSE 关缓冲 + 长超时
+  [x] docker-compose.yml       mysql:8 + pgvector/pg16 + backend + frontend
+                               （健康检查串行启动、init SQL 自动导入、uploads 持久化）
+  [x] scripts/start.bat|.sh    一键构建启动脚本（检查 Docker → compose up → 提示访问地址）
+  [x] .dockerignore ×2         （排除 __pycache__/node_modules/uploads）
+
+◆ 已完成 —— 根目录文档：
+  [x] 《未完成清单.txt》：付费项（百炼 Key）留空说明；大模型无需下载（全云端 API）；
+       大文件项（Docker 镜像/pip/npm 依赖）走国内源说明
+
+◆ 2026-09-20 Docker 构建启动（完成）：
+  [x] WSL2 生效 + Docker Desktop 启动成功
+  [x] Docker 镜像拉取：docker.m.daocloud.io 国内加速源（mysql:8 / pgvector:pg16 / python:3.11-slim / node:20-alpine / nginx:alpine）
+  [x] 前端镜像构建：npm install（淘宝源）→ vite build（2258 modules，15.98s）✅
+  [x] 后端镜像构建：pip install（阿里源，含新增 cryptography）✅
+  [x] 4 个容器全部启动运行：
+      - ai_mysql    : Up (healthy)   0.0.0.0:3307->3306（本机 3306 被占用，改用 3307）
+      - ai_pgvector : Up (healthy)   0.0.0.0:5432->5432
+      - ai_backend  : Up             0.0.0.0:9090->9090
+      - ai_frontend : Up             0.0.0.0:8080->80
+      （2026-09-21 新增第 5 个：ai_mock_llm，127.0.0.1:8898，profiles:["test"] 按需启动）
+  [x] 后端初始化完成：MySQL 建表 + admin/admin 种子 + 默认策略 + PGVector 初始化（0.3s）
+  [x] 修复两个启动问题：
+      1. models.py CharEnumField 缺少 enum_type → 改为 CharField（与 SQL 一致）
+      2. requirements.txt 缺少 cryptography（MySQL 8 caching_sha2_password 认证）→ 新增
+  [x] 冒烟验证：admin 登录成功（token 正常返回）
+  [x] Swagger 路由完整（80+ API 端点，覆盖全部功能模块）
+  [x] 前端页面可访问：http://localhost:8080
+
+【2026-09-21 全天进度明细 —— 软件测试 + 缺陷修复 + 代码优化】
+
+◆ 本日目标（用户指令）：了解项目 → 软件测试 → 撰写测试报告 → 修 bug →
+  优化代码逻辑 → 用 Docker 沙箱 + 大模型 API 调用 + 其他环境 → 使项目更完善
+
+◆ 已完成 —— Mock 大模型沙箱（ai_system/mock-llm/，新增第 5 个容器）：
+  [x] server.py  纯标准库（http.server）实现，零第三方依赖
+  [x] POST /v1/chat/completions  OpenAI 兼容：支持 stream 流式 + tool_calls 分片
+      按 Prompt 特征词自动识别任务：rewrite/hyde/coref/evaluate/self_check/judge/answer
+  [x] POST /v1/embeddings  确定性 hashing-trick 向量化（同文本恒得同向量，
+      中文二元组加权 + 特征截断模拟稠密语义向量的降维）
+  [x] POST /api/v1/services/rerank/text-rerank/text-rerank  DashScope 兼容重排
+  [x] /_control  故障注入（chat=N 让接下来 N 次对话 500）+ 调用计数
+  [x] docker-compose.yml 增加 mock-llm 服务，用 profiles:["test"] 隔离，
+      不占用默认启动栈；Mock 端口 127.0.0.1:8898
+  [x] 价值：测试可离线、可重复、零成本，且保留真实协议边界（分块传输/超时/tool_calls）
+
+◆ 已完成 —— 测试基础设施（ai_system/tests/，纯标准库，宿主机直接跑）：
+  [x] harness.py      Api（request/get/post/put/delete/ok_data/login/upload/sse）
+                      Mock（healthy/inject/reset/state）+ Report（用例登记/汇总/落 JSON）
+  [x] static_check.py AST 静态分析：检测「引用未导入的全局名」
+                      （本项目 try/except 兜底会静默吞掉 NameError，静态检查是唯一防线）
+  [x] suite_api.py    接口层 111 条用例（A 登录~R 历史缺陷回归，12 组）
+  [x] suite_e2e.py    端到端 32 条用例（9 组，串起真实业务全链路）
+
+◆ 已完成 —— 测试执行与结果（真实运行，非静态审阅）：
+  [x] 接口层：106/111 → 111/111（修复后全绿）
+  [x] 端到端：8/32 → 17/32 → 26/32 → 28/32 → 29/32 → 31/32 → 32/32（全绿）
+  [x] AST 静态检查：42 文件，1 处可疑引用 → 0 处
+  [x] 合计 143 条用例全部通过，Mock 调用 0 error
+
+◆ 已完成 —— 修复 13 项产品缺陷（3 项 P0）：
+  P0 #3  检索链路崩溃：retriever._backfill_stage 用 strategy 但签名未收该参数
+         （NameError）→ 补参数 + 调用点补传
+  P0 #4  文档入库 100% 失败（最严重）：Tortoise ORM + MySQL 下 bulk_create
+         不回填自增主键 → 向量 chunk_id=NULL / 子块 parent_id=NULL
+         → 新增 _fetch_ids() 按 doc_id+is_parent+seq 回查真实主键并校验条数
+  P0 #10 Mock 沙箱 SSE 永久挂起：声明 HTTP/1.1 却既无 Content-Length
+         也无 Transfer-Encoding → 客户端等不到响应结束 → 改分块传输编码
+  P1 #1  Agent 自查节点从未真正执行：node_self_check 漏 import get_chat_model，
+         NameError 被 except 静默吞掉 → 补 import
+  P1 #2  工具/Prompt 模糊查询 500：QuerySet|QuerySet 不被 Tortoise 支持
+         → 改 Q(a__icontains=x) | Q(b__icontains=x)
+  P1 #5  脏工具配置（schema_json='{}'）拖垮整条问答/Agent 链路
+         （Unsupported function {}）→ 新增 _normalize_schema() 校验 + 写入端校验
+  P1 #6  Agent 图无限循环（GraphRecursionError: 25）：
+         route_after_evaluate 用了 app_retrieve 内部轮次（恒为1）而非图级
+         state["round"] → 改用图级 round + AGENT_MAX_ROUNDS=3 + recursion_limit=50
+  P1 #7  Agent 时间线 seq 全为 [1,1,1,1]：LangGraph 节点拿到 state 副本，
+         节点内改动不回流 → 新增 _next_seq() 以库中 max(seq) 为准
+  P1 #8  自查失败后无限重试 → 改用显式 self_check_retry 标记控制路由
+  P1 #9  SSE 异常时 agent_run 卡 running 且错误消息为空
+         → logger.exception + 置 failed + 规范化错误消息
+  P1 #11 并发上传后台任务被 GC 回收（文档永久卡 parsing）：
+         asyncio.create_task 不保存引用，事件循环只持弱引用
+         → 模块级 _BG_TASKS 强引用集合 + _run_ingest_safe 兜底落 failed
+  P1 #12 片段人工修正被静默还原（数据丢失）：只改内存未落库就 reembed_chunk，
+         后者重读 DB 旧内容 save() 覆盖用户编辑 → 先 await c.save() 再 reembed
+  P2 #13 「流式问答」实际不流式 + 工具轮次耗尽静默返回空答案：
+         有工具时恒走非流式 ainvoke，只发 1 个 token 事件
+         → 抽出 _stream_final()，工具轮仍非流式（拿 tool_calls 更稳），
+           最终作答轮改 astream 逐 token 推送；耗尽时 warning + 直答兜底
+
+◆ 已完成 —— 修正 5 项测试侧问题（非产品缺陷，一并披露）：
+  T1 harness.py SSE 读取器逐字节 decode("utf-8","ignore") 撕裂多字节中文，
+     导致 token 只剩 ASCII 残渣（如 '# [1][2]'）→ 改用增量解码器
+  T2 E2E-9.1 轮询把 parsing 当作已收敛 → 改为必须全部进入终态才退出
+  T3 D11 搜索已被 D2 改掉的旧昵称 → 改用当前昵称
+  T4 D10 期望与路由 page:int 显式校验冲突 → 经评估显式拒绝优于静默兜底
+  T5 suite_e2e.py 提取 delta 未做空值保护 → 统一 (e.get("delta") or "")
+
+◆ 已完成 —— 文档产出：
+  [x] 《测试报告.md》全面重写（覆盖 13 缺陷的发现/证据/修复/验证 + 环境/用例设计/
+      亮点专项/结论/复现方式/原始数据索引）
+
+◆ 未完成（按优先级）：
+  1. 按文档三验证：登录 → 配模型（依赖百炼 Key）→ 写模板/工具 → 建库传文档 → 建应用 → 问答
+     （其中「配模型」需用户自行购买百炼 API Key，见《未完成清单.txt》）
+     ※ 说明：该链路已由 Mock 沙箱完整跑通（32/32），真机仅差把 Key 填进去
+  2. 百炼 API Key 付费购买后填写（见《未完成清单.txt》第一部分）
+  3. 前端 UI 尚未做自动化测试（本轮聚焦后端接口与全链路，前端仅人工可达性验证）
+
+◆ 本次约束备忘（用户强调）：
+  - 全程只在 D:\linshidaimaaaaaaaaa\企业知识库 文件夹内工作，不跳出文件夹
+  - 项目完全在 Docker 中运行（宿主机不装项目依赖，npm/pip 只发生在镜像构建内）
+════════════════════════════════════════════════════════════════
+◆ 关键设计备忘（写代码时定下的口径，改动需同步文档）：
+  - 返回结构统一 {code,msg,data}；业务异常 BizException → HTTP 200 + code!=0
+  - admin/admin 首启自动创建；默认切分/检索策略自动种子
+  - 检索管线量纲：cosine(0~1,阈值) / bm25(无上界,不阈值) / rrf(名次,不阈值) / rerank(0~1,阈值)
+  - SSE 事件：start/agent_start/step/token/refs/trace/done/error
+  - 向量表仅 kb_vectors 一张（chunk_id 唯一键，父块不入向量库）
+  - BM25 索引进程内缓存 {kb_id→index}，片段修正/重建时失效
+  - 模型配置读库带 2 秒 TTL 缓存（防高频读库，改配置≤2s 生效）
+  - 评测 Context Recall 不靠模型：用例 source_chunk_ids 集合运算
+  - 虚拟评测应用 _virtual_app()：默认模板+默认模型，不落库
+  - 前端统一 token 鉴权：Authorization: Bearer；SSE 用自实现 sseFetch（POST 不能走 EventSource）
+
+◆ 2026-09-21 新增/修订的设计口径（改动需同步文档）：
+  - 【重要】Tortoise ORM + MySQL：bulk_create 不回填自增主键（仅 PG 支持 RETURNING）。
+    凡「批量插入后需要用主键建立关联」的场景，必须用 rag/ingest.py::_fetch_ids() 回查，
+    不能依赖 c.id。
+  - 【重要】asyncio 后台任务必须保存强引用（rag/ingest.py::_BG_TASKS），
+    否则事件循环只持弱引用，任务会被 GC 中途回收（表现为文档永久 parsing）。
+  - 【重要】保存内容后若要重新向量化，必须「先落库再 reembed」
+    （reembed_chunk 以库中内容为准，否则会把内存改动覆盖掉）。
+  - HTTP/1.1 响应必须有明确的 Content-Length 或 Transfer-Encoding: chunked，
+    否则客户端永久挂起（mock-llm SSE 已改分块编码）。
+  - rag/qa.py::stream_generate：有工具时前几轮非流式（拿 tool_calls），
+    最终作答轮改 astream 逐 token 推送，保证前端仍是流式打字效果。
+  - Agent 图的收敛控制用「图级 state["round"]」+ self_check_retry 显式标记，
+    不能用 app_retrieve 的内部轮次（那个恒为 1）。
+  - agent_step.seq 以「库中 max(seq)」为准递增（LangGraph 节点拿到 state 副本，
+    内存计数会失效）。
+  - 测试 SSE 必须用增量解码（codecs.getincrementaldecoder），逐字节 decode 会撕裂中文。
+  - 测试轮询文档状态必须等「全部进入终态(parsed/failed)」，parsing 不算收敛。
+════════════════════════════════════════════════════════════════

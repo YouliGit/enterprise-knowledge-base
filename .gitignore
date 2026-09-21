@@ -1,0 +1,62 @@
+# ============================================================
+#  AI Agentic RAG 企业知识库平台 —— Git 忽略规则
+# ============================================================
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ---------- Node / Vue 前端 ----------
+node_modules/
+dist/
+dist-ssr/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# ---------- 运行时产物（用户上传的文档 / 向量化中间文件）----------
+uploads/
+!uploads/.gitkeep
+fastapi-app/uploads/
+
+# ---------- 测试结果（每次跑都会变，不入库）----------
+tests/results/
+*.log
+
+# ---------- 环境变量 / 密钥（真实配置文件不提交）----------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+!vue/.env.development
+!vue/.env.production
+
+# ---------- IDE / 编辑器 ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 临时诊断脚本 ----------
+_tmp/
+diag_*.py

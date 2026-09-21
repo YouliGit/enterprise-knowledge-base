@@ -1,0 +1,140 @@
+/* ============================================================
+   全局样式 —— 参考《文档.docx》画风
+   主色 #409EFF / 背景 #F0F2F5 / 卡片 #FFFFFF / 侧边栏 #FFFFFF
+   ============================================================ */
+:root {
+  --brand: #409eff;
+  --brand-light: #ecf5ff;
+  --brand-dark: #337ecc;
+  --page-bg: #f0f2f5;
+  --card-bg: #ffffff;
+  --text-main: #303133;
+  --text-regular: #606266;
+  --text-secondary: #909399;
+  --border-light: #e4e7ed;
+  --border-lighter: #ebeef5;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-card: 0 1px 4px rgba(0, 21, 41, 0.06);
+  --shadow-float: 0 8px 24px rgba(0, 21, 41, 0.1);
+  --sidebar-width: 220px;
+  --sidebar-collapsed: 64px;
+  --header-height: 60px;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  color: var(--text-main);
+  background: var(--page-bg);
+  -webkit-font-smoothing: antialiased;
+}
+/* ---------- 通用页面容器 ---------- */
+.page-card {
+  margin-bottom: 16px;
+}
+.page-card .el-card__header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-lighter);
+  font-weight: 600;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mono {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+}
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+/* ---------- 统一卡片风格 ---------- */
+.el-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-lighter);
+  box-shadow: var(--shadow-card) !important;
+}
+/* ---------- 统一按钮圆角 ---------- */
+.el-button {
+  border-radius: var(--radius-sm);
+}
+.el-button--large {
+  border-radius: 6px;
+}
+/* ---------- 统一输入框圆角 ---------- */
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  border-radius: var(--radius-sm);
+}
+/* ---------- 表格风格（参考截图：浅灰表头 + 细分割线） ---------- */
+.el-table th.el-table__cell {
+  background: #fafafa !important;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.el-table {
+  font-size: 14px;
+}
+/* ---------- 标签风格 ---------- */
+.el-tag {
+  border-radius: var(--radius-sm);
+}
+/* ---------- 滚动条美化 ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c8ccd4;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8adb8;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* ---------- 流式文字光标 ---------- */
+.typing-cursor::after {
+  content: '▍';
+  color: var(--brand);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+/* ---------- 页面淡入动画 ---------- */
+.fade-slide-enter-active {
+  transition: all 0.25s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}

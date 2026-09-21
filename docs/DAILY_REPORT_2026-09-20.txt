@@ -1,0 +1,70 @@
+════════════════════════════════════════════════════════════════
+ 2026-09-20 工作汇报 —— AI Agentic RAG 企业知识库平台
+════════════════════════════════════════════════════════════════
+
+## ✅ 本轮完成内容
+
+【1. 前端全部页面（ai_system/vue/，最后一块拼图）】
+  - src/views/portal/ChatView.vue —— 用户端 SSE 流式问答页：
+    左侧应用选择 + 会话列表（新建/删除），右侧消息气泡流式打字、
+    引用来源表格折叠、点赞/点踩反馈（useful/useless）
+  - 修正了 SplitStrategy 里 el-radio 用废弃 label 属性传值的问题（改 value）
+
+【2. Docker 化全套文件（ai_system/）】
+  - fastapi-app/Dockerfile ：python:3.11-slim + pip 阿里源
+  - vue/Dockerfile         ：node:20-alpine 构建（淘宝源）→ nginx:alpine 托管
+  - vue/nginx.conf         ：静态服务 + /api 反代，SSE 关缓冲、超时 300s
+  - docker-compose.yml     ：mysql:8 + pgvector/pg16 + backend + frontend
+                            健康检查串行启动、init SQL 自动导入、uploads 挂载持久化
+  - scripts/start.bat / start.sh ：一键构建启动脚本
+  - .dockerignore × 2
+
+【3. 验证与进度】
+  - 后端全部 42 个 .py 语法检查通过（0 失败）
+  - 《项目进度.txt》已全面更新（里程碑整体推进到只剩构建启动环节）
+
+════════════════════════════════════════════════════════════════
+
+## ✅ 本轮完成内容
+
+【1. Docker 构建启动成功（ai_system/）】
+  - WSL2 生效 + Docker Desktop 启动成功
+  - 镜像拉取：docker.m.daocloud.io 国内加速源
+    - mysql:8 → docker.m.daocloud.io/library/mysql:8
+    - pgvector/pgvector:pg16 → docker.m.daocloud.io/pgvector/pgvector:pg16
+    - python:3.11-slim / node:20-alpine / nginx:alpine（Dockerfile FROM 改为加速域名）
+  - 前端镜像构建：npm install（淘宝源 npmmirror）→ vite build（2258 modules，15.98s）✅
+  - 后端镜像构建：pip install（阿里源 mirrors.aliyun.com）✅
+  - 4 个容器全部启动运行：
+    - ai_mysql    : Up (healthy)   0.0.0.0:3307→3306
+    - ai_pgvector : Up (healthy)   0.0.0.0:5432→5432
+    - ai_backend  : Up             0.0.0.0:9090→9090
+    - ai_frontend : Up             0.0.0.0:8080→80
+
+【2. 修复两个启动问题】
+  - models.py 第 51 行：CharEnumField() 缺少 enum_type → 改为 CharField(max_length=32)
+  - requirements.txt：新增 cryptography>=42.0.0（MySQL 8 caching_sha2_password 认证需要）
+
+【3. 冒烟验证】
+  - admin 登录成功：POST /api/login → 返回 token + 用户信息
+  - Swagger 路由完整（80+ API 端点）
+  - 前端页面可访问：http://localhost:8080（返回 200，标题正确）
+  - 后端初始化完成：MySQL 建表 + admin/admin 种子 + 默认策略 + PGVector 初始化（0.3s）
+
+═══════════════════════════════════════════════════════════════
+
+## ⏸ 当前状态
+
+所有服务正常运行，下一步按文档三验证核心链路：
+  1. 登录 http://localhost:8080（admin/admin）
+  2. 进入管理端 → AI模型配置 → 添加对话/向量/重排模型
+  3. 添加 Prompt 模板（可导入内置模板）
+  4. 添加工具（可导入内置工具）
+  5. 创建知识库 → 上传文档 → 等待解析完成
+  6. 创建问答应用 → 绑定知识库/Prompt/模型/策略
+  7. 进入用户端问答 → 选择应用 → 开始对话
+
+⚠️ 注意：步骤 2 的模型配置需要百炼 API Key（付费项），
+    未填写时检索/问答会报 401 错误，其他功能（建库/传文档/检索测试）正常可用。
+
+════════════════════════════════════════════════════════════════
